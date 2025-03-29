@@ -1,0 +1,158 @@
+Генерируется случайное число, и остаток от деления этого числа на
+10 сохраняется. Это генератор случайных чисел с диапазоном от 0 до 9. Это число
+затем определяет, какой алгоритм используется для вычисления значения, с которым сравнивается введенный пользователем
+пароль. Обратите внимание, начальное значение для генератора случайных чисел
+— это количество миллисекунд с начала эпохи (1 января 1970 г.).
+
+Анализ
+
+Основная функция находится по адресу 0x401210. Строка создается из
+инструкции вызова по адресу 0x401243. Строка, возвращаемая этой функцией, всегда
+"zBLs%&n)+#". Эта строка будет индексирована алгоритмом, который будет выбран позже при выполнении программы. И
+нструкции 0x401248–0x0x401254 являются источником C для
+
+srand(time(NULL));
+
+Это задает генератор случайных чисел в стандартной библиотеке C с числом
+миллисекунд с 1 января 1970 года. По сути, это попытка сделать генератор случайных чисел
+действительно случайным (хотя это не так). Затем вызывается функция rand для генерации «случайного» беззнакового целого числа. 
+Затем это значение делится на 10, а его остаток используется для определения алгоритма, используемого для генерации
+правильного значения пароля.
+
+Далее следует код ассемблера и его исходный код C для генерации пароля.
+Обратите внимание, что некоторая логика используется для предварительного заполнения нескольких регистров адресом
+строки «zBLs%&n)+#». Эта строка была строкой, созданной из функции, вызванной
+по адресу 0x401243. Затем случайное число, сгенерированное сверху, является случайным числом
+в равенстве.
+
+random number == 0
+
+        0040128f 0f be 58 09     MOVSX      EBX,byte ptr [EAX + 0x9]
+        00401293 0f be 41 03     MOVSX      EAX,byte ptr [ECX + 0x3]
+        00401297 0f af d8        IMUL       EBX,EAX
+        0040129a 0f be 42 05     MOVSX      EAX,byte ptr [EDX + 0x5]
+        0040129e 0f af d8        IMUL       EBX,EAX
+
+		password = key[9] * key[3] * key[5];
+
+random number == 1
+
+        004012ce 0f be 40 01     MOVSX      EAX,byte ptr [EAX + 0x1]
+        004012d2 0f be 5a 03     MOVSX      EBX,byte ptr [EDX + 0x3]
+        004012d6 2b d8           SUB        EBX,EAX
+        004012d8 0f be 41 04     MOVSX      EAX,byte ptr [ECX + 0x4]
+        004012dc 0f af d8        IMUL       EBX,EAX
+        004012df 0f be 46 08     MOVSX      EAX,byte ptr [ESI + 0x8]
+        004012e3 0f af d8        IMUL       EBX,EAX
+
+        password = (key[3] - key[1]) * key[4] * key[8];
+
+random number == 2
+
+        0040130c 0f be 58 07     MOVSX      EBX,byte ptr [EAX + 0x7]
+        00401310 0f be 41 05     MOVSX      EAX,byte ptr [ECX + 0x5]
+        00401314 0f af d8        IMUL       EBX,EAX
+        00401317 0f be 42 02     MOVSX      EAX,byte ptr [EDX + 0x2]
+        0040131b 0f af d8        IMUL       EBX,EAX
+
+		password = key[7] * key[5] * key[2];
+
+random number == 3
+
+        00401350 0f be 58 06     MOVSX      EBX,byte ptr [EAX + 0x6]
+        00401354 0f be 01        MOVSX      EAX,byte ptr [ECX]
+        00401357 03 d8           ADD        EBX,EAX
+        00401359 0f be 42 06     MOVSX      EAX,byte ptr [EDX + 0x6]
+        0040135d 0f af d8        IMUL       EBX,EAX
+        00401360 0f be 06        MOVSX      EAX,byte ptr [ESI]
+        00401363 0f af d8        IMUL       EBX,EAX
+        00401366 0f be 47 07     MOVSX      EAX,byte ptr [EDI + 0x7]
+        0040136a 0f af d8        IMUL       EBX,EAX
+
+		password = (key[6] + key[0]) * key[6] * key[0] * key[7];
+
+random number == 4
+
+        0040139a 0f be 18        MOVSX      EBX,byte ptr [EAX]
+        0040139d 0f be 42 08     MOVSX      EAX,byte ptr [EDX + 0x8]
+        004013a1 0f af d8        IMUL       EBX,EAX
+        004013a4 0f be 46 02     MOVSX      EAX,byte ptr [ESI + 0x2]
+        004013a8 0f af d8        IMUL       EBX,EAX
+        004013ab 0f be 41 09     MOVSX      EAX,byte ptr [ECX + 0x9]
+        004013af 2b d8           SUB        EBX,EAX
+
+		password = key[0] * key[8] * key[2] - key[9];
+
+random number == 5
+
+        004013e3 0f be 58 07     MOVSX      EBX,byte ptr [EAX + 0x7]
+        004013e7 0f be 41 08     MOVSX      EAX,byte ptr [ECX + 0x8]
+        004013eb 0f af d8        IMUL       EBX,EAX
+        004013ee 0f be 42 01     MOVSX      EAX,byte ptr [EDX + 0x1]
+        004013f2 0f af d8        IMUL       EBX,EAX
+        004013f5 0f be 46 09     MOVSX      EAX,byte ptr [ESI + 0x9]
+        004013f9 03 d8           ADD        EBX,EAX
+        004013fb 0f be 47 03     MOVSX      EAX,byte ptr [EDI + 0x3]
+        004013ff 03 d8           ADD        EBX,EAX
+
+		password = key[7] * key[8] * key[1] + key[9] + key[3];
+
+random number == 6
+
+        00401433 0f be 40 08     MOVSX      EAX,byte ptr [EAX + 0x8]
+        00401437 0f be 59 02     MOVSX      EBX,byte ptr [ECX + 0x2]
+        0040143b 2b d8           SUB        EBX,EAX
+        0040143d 0f be 46 03     MOVSX      EAX,byte ptr [ESI + 0x3]
+        00401441 0f af d8        IMUL       EBX,EAX
+        00401444 0f be 42 09     MOVSX      EAX,byte ptr [EDX + 0x9]
+        00401448 0f af d8        IMUL       EBX,EAX
+        0040144b 0f be 47 05     MOVSX      EAX,byte ptr [EDI + 0x5]
+        0040144f 0f af d8        IMUL       EBX,EAX
+
+		password = (key[2] - key[8]) * key[3] * key[9] * key[5];
+
+random number == 7
+
+        00401478 0f be 58 09     MOVSX      EBX,byte ptr [EAX + 0x9]
+        0040147c 0f be 42 02     MOVSX      EAX,byte ptr [EDX + 0x2]
+        00401480 0f af d8        IMUL       EBX,EAX
+        00401483 0f be 01        MOVSX      EAX,byte ptr [ECX]
+        00401486 0f af d8        IMUL       EBX,EAX
+
+		password = key[9] * key[2] * key[0];
+
+random number == 8
+
+        004014bb 0f be 40 02     MOVSX      EAX,byte ptr [EAX + 0x2]
+        004014bf 0f be 5a 09     MOVSX      EBX,byte ptr [EDX + 0x9]
+        004014c3 2b d8           SUB        EBX,EAX
+        004014c5 0f be 41 05     MOVSX      EAX,byte ptr [ECX + 0x5]
+        004014c9 0f af d8        IMUL       EBX,EAX
+        004014cc 0f be 46 03     MOVSX      EAX,byte ptr [ESI + 0x3]
+        004014d0 0f af d8        IMUL       EBX,EAX
+        004014d3 0f be 47 01     MOVSX      EAX,byte ptr [EDI + 0x1]
+        004014d7 0f af d8        IMUL       EBX,EAX
+
+		password = (key[9] - key[2]) * key[5] * key[3] * key[1];
+
+random number == 9
+
+		004014fd 0f be 58 08     MOVSX      EBX,byte ptr [EAX + 0x8]
+        00401501 0f be 02        MOVSX      EAX,byte ptr [EDX]
+        00401504 0f af d8        IMUL       EBX,EAX
+        00401507 0f be 41 04     MOVSX      EAX,byte ptr [ECX + 0x4]
+        0040150b 0f af d8        IMUL       EBX,EAX
+
+		password = key[8] * key[0] * key[4];
+		
+
+'z'	0	122
+'B'	1	66
+'L'	2	76
+'s'	3	115
+'%'	4	37
+'&'	5	38
+'n'	6	110
+')'	7	41
+'+'	8	43
+'#'	9	35
