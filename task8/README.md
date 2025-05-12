@@ -34,8 +34,6 @@ int main() {
 }
 
 
-```bash
-cyclic 200
 ```
 ## 3. Identifying the Vulnerability
 
@@ -46,6 +44,9 @@ The program contains a buffer `char buffer[64]`, which is vulnerable to overflow
 ### 3.2 Pattern Creation and Finding the Offset
 
 To determine the exact location where the buffer overflow occurs (i.e., where the return address is stored), we use the `cyclic` command to generate a unique pattern:
+```bash
+cyclic 200
+```
 
 This command generates a 200-character pattern that is used as input for the program. Upon crashing the program with a segmentation fault, we can inspect the saved register values (specifically EIP) in GDB to locate the point where the return address was overwritten.
 
