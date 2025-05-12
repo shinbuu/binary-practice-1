@@ -59,9 +59,8 @@ By using the `cyclic -l` command in GDB, we can determine the exact offset to th
 
 ```bash
 cyclic -l 0x61616174
-![img1](img/img1.jpg)
 ```
-
+![img1](img/img1.jpg)
 The output shows that the offset to overwrite the return address is 76 bytes.
 
 ## 4. Writing the Exploit
@@ -101,9 +100,8 @@ When the program is executed with the crafted input, it successfully redirects t
 
 ```
 Access granted! Exploit successful.
-![img2](img/img2.jpg)
 ```
-
+![img2](img/img2.jpg)
 A shell is then spawned, giving the attacker control over the system.
 
 ## 5. Protecting the Program and Additional Analysis
@@ -116,16 +114,14 @@ After successfully exploiting the buffer overflow, we test the program with addi
 
 ```bash
 gcc -m32 -fstack-protector vuln.c -o vuln_protected
-![img3](img/img3.jpg)
 ```
-
+![img3](img/img3.jpg)
 **ASLR:** Address Space Layout Randomization (ASLR) is enabled to randomize memory addresses.
 
 ```bash
 sudo sysctl -w kernel.randomize_va_space=2
-![img4](img/img4.jpg)
 ```
-
+![img4](img/img4.jpg)
 With these protections in place, the program behaves differently, and the exploit is blocked. The stack protector causes a crash due to the invalid stack state, and ASLR randomizes the address of the `secret()` function, making it difficult to predict the address.
 
 ### 5.2 IDA Pro Analysis
